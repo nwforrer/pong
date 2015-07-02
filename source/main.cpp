@@ -10,10 +10,16 @@
 const int SCREEN_WIDTH = 640;
 const int SCREEN_HEIGHT = 480;
 
+const int PADDLE_VELOCITY = 3;
+
 bool init();
 bool loadMedia();
 bool loadObjects();
 void close();
+
+void handleKeyboardEvent(SDL_Event& e);
+
+void checkPaddleScreenCollision(Sprite sprite);
 
 SDL_Window* gWindow = NULL;
 SDL_Renderer* gRenderer = NULL;
@@ -49,7 +55,7 @@ bool init()
 		}
 		else
 		{
-			gRenderer = SDL_CreateRenderer(gWindow, -1, SDL_RENDERER_ACCELERATED);
+			gRenderer = SDL_CreateRenderer(gWindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 			if (gRenderer == NULL)
 			{
 				printf("Renderer could not be created! SDL Error: %s\n", SDL_GetError());
@@ -166,6 +172,72 @@ void close()
 	SDL_Quit();
 }
 
+void handleKeyboardEvent(SDL_Event& e)
+{
+	if (e.type == SDL_KEYDOWN && e.key.repeat == 0)
+	{
+		switch (e.key.keysym.sym)
+		{
+			case SDLK_w:
+			{
+				gPlayer1Sprite.addVelY(-PADDLE_VELOCITY);
+			} break;
+			
+			case SDLK_s:
+			{
+				gPlayer1Sprite.addVelY(PADDLE_VELOCITY);
+			} break;
+
+			case SDLK_UP:
+			{
+				gPlayer2Sprite.addVelY(-PADDLE_VELOCITY);
+			} break;
+
+			case SDLK_DOWN:
+			{
+				gPlayer2Sprite.addVelY(PADDLE_VELOCITY);
+			}
+		}
+	}
+	else if (e.type == SDL_KEYUP && e.key.repeat == 0)
+	{
+		switch (e.key.keysym.sym)
+		{
+			case SDLK_w:
+			{
+				gPlayer1Sprite.addVelY(PADDLE_VELOCITY);
+			} break;
+			
+			case SDLK_s:
+			{
+				gPlayer1Sprite.addVelY(-PADDLE_VELOCITY);
+			} break;
+
+			case SDLK_UP:
+			{
+				gPlayer2Sprite.addVelY(PADDLE_VELOCITY);
+			} break;
+
+			case SDLK_DOWN:
+			{
+				gPlayer2Sprite.addVelY(-PADDLE_VELOCITY);
+			}
+		}
+	}
+}
+
+void checkPaddleScreenCollision(Sprite* sprite)
+{
+	if (sprite->getPosY() < 0)
+	{
+		sprite->setPosY(0);
+	}
+	else if (sprite->getPosY() + sprite->getHeight() > SCREEN_HEIGHT)
+	{
+		sprite->setPosY(SCREEN_HEIGHT - sprite->getHeight());
+	}
+}
+
 int main(int argc, char **argv)
 {
 	if (!init())
@@ -201,7 +273,16 @@ int main(int argc, char **argv)
 							} break;
 						}
 					}
+
+					handleKeyboardEvent(e);
 				}
+
+				gPlayer1Sprite.update();
+				gPlayer2Sprite.update();
+				gBallSprite.update();
+
+				checkPaddleScreenCollision(&gPlayer1Sprite);
+				checkPaddleScreenCollision(&gPlayer2Sprite);
 
 				SDL_SetRenderDrawColor(gRenderer, 0, 0, 0, 0);
 				SDL_RenderClear(gRenderer);

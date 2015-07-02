@@ -3,8 +3,12 @@
 Sprite::Sprite()
 {
 	mTexture = NULL;
+
 	mPosX = 0;
 	mPosY = 0;
+
+	mVelX = 0;
+	mVelY = 0;
 }
 
 Sprite::~Sprite()
@@ -25,9 +29,57 @@ void Sprite::free()
 {
 	mPosX = 0;
 	mPosY = 0;
+
+	mVelX = 0;
+	mVelY = 0;
+}
+
+void Sprite::update()
+{
+	mPosY += mVelY;
 }
 
 void Sprite::render()
 {
 	mTexture->render(mPosX, mPosY);
+}
+
+void Sprite::addVelX(int velX)
+{
+	mVelX += velX;
+}
+
+void Sprite::addVelY(int velY)
+{
+	mVelY += velY;
+}
+
+int Sprite::getPosX()
+{
+	return mPosX;
+}
+
+int Sprite::getPosY()
+{
+	return mPosY;
+}
+
+void Sprite::setPosX(int posX)
+{
+	mPosX = posX;
+}
+
+void Sprite::setPosY(int posY)
+{
+	mPosY = posY;
+}
+
+int Sprite::getWidth()
+{
+	return mTexture->getWidth();
+}
+
+int Sprite::getHeight()
+{
+	return mTexture->getHeight();
 }
