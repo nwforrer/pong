@@ -1,8 +1,8 @@
-OBJS = source/main.cpp
+OBJS = source/main.cpp source/SDLTexture.cpp
 
 CC = g++
 
-COMPILER_FLAGS  = -g -Wall
+COMPILER_FLAGS  = -g -Wall -Werror
 
 INCLUDE_FLAGS = -I/usr/include/SDL2 -D_REENTRANT
 LINKER_FLAGS = -L/usr/lib -lSDL2 -lSDL2_image -lpthread
