@@ -10,11 +10,11 @@ bool init();
 bool loadMedia();
 void close();
 
-SDL_Surface* loadSurface(std::string path);
+SDL_Texture* loadTexture(std::string path);
 
 SDL_Window* gWindow = NULL;
-SDL_Surface* gScreenSurface = NULL;
-SDL_Surface* gStickGuy = NULL;
+SDL_Renderer* gRenderer = NULL;
+SDL_Texture* gTexture = NULL;
 
 bool init()
 {
@@ -35,14 +35,21 @@ bool init()
     }
     else
     {
-      int imgFlags = IMG_INIT_PNG;
-      if (!(IMG_Init(imgFlags) & imgFlags))
+      gRenderer = SDL_CreateRenderer(gWindow, -1, SDL_RENDERER_ACCELERATED);
+      if (gRenderer == NULL)
       {
-        printf("SDL_image could not initialize! SDL_image Error: %s\n", IMG_GetError());
+        printf("Renderer could not be created! SDL Error: %s\n", SDL_GetError());
+        success = false;
       }
       else
       {
-        gScreenSurface = SDL_GetWindowSurface(gWindow);
+        SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
+
+        int imgFlags = IMG_INIT_PNG;
+        if (!(IMG_Init(imgFlags) & imgFlags))
+        {
+          printf("SDL_image could not initialize! SDL_image Error: %s\n", IMG_GetError());
+        }
       }
     }
   }
@@ -50,14 +57,37 @@ bool init()
   return success;
 }
 
+SDL_Texture* loadTexture(std::string path)
+{
+  SDL_Texture* newTexture = NULL;
+
+  SDL_Surface* loadedSurface = IMG_Load(path.c_str());
+  if (loadedSurface == NULL)
+  {
+    printf("Unable to load image %s! SDL_image Error: %s\n", path.c_str(), IMG_GetError());
+  }
+  else
+  {
+    newTexture = SDL_CreateTextureFromSurface(gRenderer, loadedSurface);
+    if (newTexture == NULL)
+    {
+      printf("Unable to create texture from %s! SDL Error: %s\n", path.c_str(), SDL_GetError());
+    }
+
+    SDL_FreeSurface(loadedSurface);
+  }
+
+  return newTexture;
+}
+
 bool loadMedia()
 {
   bool success = true;
 
-  gStickGuy = loadSurface("stick-guy.png");
-  if (gStickGuy == NULL)
+  gTexture = loadTexture("stick-guy.png");
+  if (gTexture == NULL)
   {
-    printf("Unable to load image %s! SDL Error: %s\n", "stick-guy.png", SDL_GetError());
+    printf("Failed to load texture image!\n");
     success = false;
   }
 
@@ -66,37 +96,16 @@ bool loadMedia()
 
 void close()
 {
-  SDL_FreeSurface(gStickGuy);
-  gStickGuy = NULL;
+  SDL_DestroyTexture(gTexture);
+  gTexture = NULL;
 
+  SDL_DestroyRenderer(gRenderer);
   SDL_DestroyWindow(gWindow);
   gWindow = NULL;
+  gRenderer = NULL;
 
   IMG_Quit();
   SDL_Quit();
-}
-
-SDL_Surface* loadSurface(std::string path)
-{
-  SDL_Surface* optimizedSurface = NULL;
-
-  SDL_Surface* loadedSurface = IMG_Load(path.c_str());
-  if (loadedSurface == NULL)
-  {
-    printf("Unable to load image %s! SDL Error: %s\n", path.c_str(), IMG_GetError());
-  }
-  else
-  {
-    optimizedSurface = SDL_ConvertSurface(loadedSurface, gScreenSurface->format, 0);
-    if (optimizedSurface == NULL)
-    {
-      printf("Unable to optimize image %s! SDL Error: %s\n", path.c_str(), SDL_GetError());
-    }
-
-    SDL_FreeSurface(loadedSurface);
-  }
-
-  return optimizedSurface;
 }
 
 int main(int argc, char **argv)
@@ -136,8 +145,9 @@ int main(int argc, char **argv)
           }
         }
         
-        SDL_BlitSurface(gStickGuy, NULL, gScreenSurface, NULL);
-        SDL_UpdateWindowSurface(gWindow);
+        SDL_RenderClear(gRenderer);
+        SDL_RenderCopy(gRenderer, gTexture, NULL, NULL);
+        SDL_RenderPresent(gRenderer);
       }
     }
   }
