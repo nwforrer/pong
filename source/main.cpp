@@ -8,6 +8,7 @@
 #include "SDLTexture.h"
 #include "SDLTimer.h"
 #include "Sprite.h"
+#include "Physics.h"
 
 const int SCREEN_WIDTH = 640;
 const int SCREEN_HEIGHT = 480;
@@ -22,6 +23,8 @@ void close();
 void handleKeyboardEvent(SDL_Event& e);
 
 void checkPaddleScreenCollision(Sprite sprite);
+
+void checkBallCollisions();
 
 SDL_Window* gWindow = NULL;
 SDL_Renderer* gRenderer = NULL;
@@ -145,6 +148,11 @@ bool loadObjects()
 		printf("Could not initialize ball sprite!\n");
 		success = false;
 	}
+	else
+	{
+		gBallSprite.setVelX(-2);
+		gBallSprite.setVelY(1);
+	}
 
 	return success;
 }
@@ -240,6 +248,23 @@ void checkPaddleScreenCollision(Sprite* sprite)
 	}
 }
 
+void checkBallCollisions()
+{
+	if (Physics::getInstance().checkSpriteCollision(gBallSprite, gPlayer1Sprite))
+	{
+		gBallSprite.setVelX(gBallSprite.getVelX() * -1);
+	}
+	else if (Physics::getInstance().checkSpriteCollision(gBallSprite, gPlayer2Sprite))
+	{
+		gBallSprite.setVelX(gBallSprite.getVelX() * -1);
+	}
+
+	if (gBallSprite.getPosY() < 0 || gBallSprite.getPosY() + gBallSprite.getHeight() > SCREEN_HEIGHT)
+	{
+		gBallSprite.setVelY(gBallSprite.getVelY() * -1);
+	}
+}
+
 int main(int argc, char **argv)
 {
 	if (!init())
@@ -289,6 +314,8 @@ int main(int argc, char **argv)
 
 				checkPaddleScreenCollision(&gPlayer1Sprite);
 				checkPaddleScreenCollision(&gPlayer2Sprite);
+
+				checkBallCollisions();
 
 				SDL_SetRenderDrawColor(gRenderer, 0, 0, 0, 0);
 				SDL_RenderClear(gRenderer);

@@ -37,6 +37,7 @@ void Sprite::free()
 void Sprite::update()
 {
 	mPosY += mVelY;
+	mPosX += mVelX;
 }
 
 void Sprite::render()
@@ -52,6 +53,26 @@ void Sprite::addVelX(int velX)
 void Sprite::addVelY(int velY)
 {
 	mVelY += velY;
+}
+
+void Sprite::setVelX(int velX)
+{
+	mVelX = velX;
+}
+
+void Sprite::setVelY(int velY)
+{
+	mVelY = velY;
+}
+
+int Sprite::getVelX()
+{
+	return mVelX;
+}
+
+int Sprite::getVelY()
+{
+	return mVelY;
 }
 
 int Sprite::getPosX()

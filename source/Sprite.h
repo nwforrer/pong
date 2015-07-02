@@ -18,6 +18,12 @@ public:
 	void addVelX(int velX);
 	void addVelY(int velY);
 
+	void setVelX(int velX);
+	void setVelY(int velY);
+
+	int getVelX();
+	int getVelY();
+
 	int getPosX();
 	int getPosY();
 

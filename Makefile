@@ -1,11 +1,12 @@
 OBJS = source/main.cpp \
 	   source/SDLTexture.cpp \
 	   source/Sprite.cpp \
-	   source/SDLTimer.cpp
+	   source/SDLTimer.cpp \
+	   source/Physics.cpp
 
 CC = g++
 
-COMPILER_FLAGS  = -g -Wall -Werror
+COMPILER_FLAGS  = -std=c++11 -g -Wall -Werror
 
 INCLUDE_FLAGS = -I/usr/include/SDL2 -D_REENTRANT
 LINKER_FLAGS = -L/usr/lib -lSDL2 -lSDL2_image -lSDL2_ttf -lpthread
