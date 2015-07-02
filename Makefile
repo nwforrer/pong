@@ -1,6 +1,7 @@
 OBJS = source/main.cpp \
 	   source/SDLTexture.cpp \
-	   source/Sprite.cpp
+	   source/Sprite.cpp \
+	   source/SDLTimer.cpp
 
 CC = g++
 
