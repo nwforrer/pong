@@ -12,7 +12,7 @@
 const int SCREEN_WIDTH = 640;
 const int SCREEN_HEIGHT = 480;
 
-const int PADDLE_VELOCITY = 3;
+const int PADDLE_VELOCITY = 4;
 
 bool init();
 bool loadMedia();
@@ -29,7 +29,6 @@ SDL_Renderer* gRenderer = NULL;
 TTF_Font* gFont = NULL;
 
 SDLTexture gTextTexture;
-SDLTexture gTimeTextTexture;
 
 SDLTexture gPlayer1Texture;
 SDLTexture gPlayer2Texture;
@@ -157,7 +156,6 @@ void close()
 	gBallTexture.free();
 
 	gTextTexture.free();
-	gTimeTextTexture.free();
 
 	gPlayer1Sprite.free();
 	gPlayer2Sprite.free();
@@ -258,11 +256,8 @@ int main(int argc, char **argv)
 		{
 			bool quit = false;
 			SDL_Event e;
-			SDL_Color textColor = { 255, 255, 255, 255 };
 
 			SDLTimer timer;
-
-			std::stringstream timeText;
 
 			while (!quit)
 			{
@@ -280,35 +275,13 @@ int main(int argc, char **argv)
 							{
 								quit = true;
 							} break;
-
-							case SDLK_RETURN:
-							{
-								if (timer.isStarted())
-								{
-									timer.stop();
-								}
-								else
-								{
-									timer.start();
-								}
-							} break;
-
-							case SDLK_p:
-							{
-								if (timer.isPaused())
-								{
-									timer.unpause();
-								}
-								else
-								{
-									timer.pause();
-								}
-							} break;
 						}
 					}
 
 					handleKeyboardEvent(e);
 				}
+
+				//float timeStep = timer.getTicks() / 1000.0f;
 
 				gPlayer1Sprite.update();
 				gPlayer2Sprite.update();
@@ -316,14 +289,6 @@ int main(int argc, char **argv)
 
 				checkPaddleScreenCollision(&gPlayer1Sprite);
 				checkPaddleScreenCollision(&gPlayer2Sprite);
-
-				timeText.str( "" );
-				timeText << "Seconds since start time " << (timer.getTicks() / 1000.0f);
-
-				if (!gTimeTextTexture.loadFromRenderedText(gRenderer, gFont, timeText.str().c_str(), textColor))
-				{
-					printf("Unable to render time texture!\n");
-				}
 
 				SDL_SetRenderDrawColor(gRenderer, 0, 0, 0, 0);
 				SDL_RenderClear(gRenderer);
@@ -333,9 +298,10 @@ int main(int argc, char **argv)
 				gBallSprite.render();
 
 				gTextTexture.render((SCREEN_WIDTH - gTextTexture.getWidth()) / 2, (SCREEN_HEIGHT - gTextTexture.getHeight()) / 2);
-				gTimeTextTexture.render((SCREEN_WIDTH - gTimeTextTexture.getWidth()) / 2, gTimeTextTexture.getHeight() + 10);
 				
 				SDL_RenderPresent(gRenderer);
+
+				timer.start();
 			}
 		}
 	}

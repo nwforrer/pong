@@ -41,7 +41,7 @@ void Sprite::update()
 
 void Sprite::render()
 {
-	mTexture->render(mPosX, mPosY);
+	mTexture->render((int)mPosX, (int)mPosY);
 }
 
 void Sprite::addVelX(int velX)
