@@ -1,4 +1,6 @@
-OBJS = source/main.cpp source/SDLTexture.cpp
+OBJS = source/main.cpp \
+	   source/SDLTexture.cpp \
+	   source/Sprite.cpp
 
 CC = g++
 

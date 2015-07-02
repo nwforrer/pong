@@ -5,12 +5,14 @@
 #include <string>
 
 #include "SDLTexture.h"
+#include "Sprite.h"
 
 const int SCREEN_WIDTH = 640;
 const int SCREEN_HEIGHT = 480;
 
 bool init();
 bool loadMedia();
+bool loadObjects();
 void close();
 
 SDL_Window* gWindow = NULL;
@@ -23,6 +25,10 @@ SDLTexture gTextTexture;
 SDLTexture gPlayer1Texture;
 SDLTexture gPlayer2Texture;
 SDLTexture gBallTexture;
+
+Sprite gPlayer1Sprite;
+Sprite gPlayer2Sprite;
+Sprite gBallSprite;
 
 bool init()
 {
@@ -110,6 +116,31 @@ bool loadMedia()
 	return success;
 }
 
+bool loadObjects()
+{
+	bool success = true;
+
+	if (!gPlayer1Sprite.init(&gPlayer1Texture, 50, (SCREEN_HEIGHT - gPlayer1Texture.getHeight()) / 2))
+	{
+		printf("Could not initialize player1 sprite!\n");
+		success = false;
+	}
+
+	if (!gPlayer2Sprite.init(&gPlayer2Texture, SCREEN_WIDTH - gPlayer2Texture.getWidth() - 50, (SCREEN_HEIGHT - gPlayer2Texture.getHeight()) / 2))
+	{
+		printf("Could not initialize player2 sprite!\n");
+		success = false;
+	}
+
+	if (!gBallSprite.init(&gBallTexture, (SCREEN_WIDTH - gBallTexture.getWidth()) / 2, 100))
+	{
+		printf("Could not initialize ball sprite!\n");
+		success = false;
+	}
+
+	return success;
+}
+
 void close()
 {
 	gPlayer1Texture.free();
@@ -117,6 +148,10 @@ void close()
 	gBallTexture.free();
 
 	gTextTexture.free();
+
+	gPlayer1Sprite.free();
+	gPlayer2Sprite.free();
+	gBallSprite.free();
 
 	TTF_CloseFont(gFont);
 	gFont = NULL;
@@ -139,7 +174,7 @@ int main(int argc, char **argv)
 	}
 	else
 	{
-		if (!loadMedia())
+		if (!loadMedia() || !loadObjects())
 		{
 			printf("Failed to load media!\n");
 		}
@@ -171,9 +206,9 @@ int main(int argc, char **argv)
 				SDL_SetRenderDrawColor(gRenderer, 0, 0, 0, 0);
 				SDL_RenderClear(gRenderer);
 
-				gPlayer1Texture.render(50, (SCREEN_HEIGHT - gPlayer1Texture.getHeight()) / 2);
-				gPlayer2Texture.render(SCREEN_WIDTH - gPlayer2Texture.getWidth() - 50, (SCREEN_HEIGHT - gPlayer2Texture.getHeight()) / 2);
-				gBallTexture.render((SCREEN_WIDTH - gBallTexture.getWidth()) / 2, 100);
+				gPlayer1Sprite.render();
+				gPlayer2Sprite.render();
+				gBallSprite.render();
 
 				gTextTexture.render((SCREEN_WIDTH - gTextTexture.getWidth()) / 2, (SCREEN_HEIGHT - gTextTexture.getHeight()) / 2);
 				
