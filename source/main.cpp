@@ -1,4 +1,5 @@
 #include <SDL.h>
+#include <SDL_image.h>
 #include <stdio.h>
 #include <string>
 
@@ -34,7 +35,15 @@ bool init()
     }
     else
     {
-      gScreenSurface = SDL_GetWindowSurface(gWindow);
+      int imgFlags = IMG_INIT_PNG;
+      if (!(IMG_Init(imgFlags) & imgFlags))
+      {
+        printf("SDL_image could not initialize! SDL_image Error: %s\n", IMG_GetError());
+      }
+      else
+      {
+        gScreenSurface = SDL_GetWindowSurface(gWindow);
+      }
     }
   }
 
@@ -45,10 +54,10 @@ bool loadMedia()
 {
   bool success = true;
 
-  gStickGuy = loadSurface("stick-guy.bmp");
+  gStickGuy = loadSurface("stick-guy.png");
   if (gStickGuy == NULL)
   {
-    printf("Unable to load image %s! SDL Error: %s\n", "stick-guy.bmp", SDL_GetError());
+    printf("Unable to load image %s! SDL Error: %s\n", "stick-guy.png", SDL_GetError());
     success = false;
   }
 
@@ -63,6 +72,7 @@ void close()
   SDL_DestroyWindow(gWindow);
   gWindow = NULL;
 
+  IMG_Quit();
   SDL_Quit();
 }
 
@@ -70,10 +80,10 @@ SDL_Surface* loadSurface(std::string path)
 {
   SDL_Surface* optimizedSurface = NULL;
 
-  SDL_Surface* loadedSurface = SDL_LoadBMP(path.c_str());
+  SDL_Surface* loadedSurface = IMG_Load(path.c_str());
   if (loadedSurface == NULL)
   {
-    printf("Unable to load image %s! SDL Error: %s\n", path.c_str(), SDL_GetError());
+    printf("Unable to load image %s! SDL Error: %s\n", path.c_str(), IMG_GetError());
   }
   else
   {
