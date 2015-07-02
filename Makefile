@@ -11,3 +11,6 @@ OBJ_NAME = build/pong
 
 all : $(OBJS)
 	$(CC) $(OBJS) $(COMPILER_FLAGS) $(INCLUDE_FLAGS) $(LINKER_FLAGS) -o $(OBJ_NAME)
+
+clean :
+	rm $(OBJ_NAME)
