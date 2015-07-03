@@ -7,6 +7,9 @@ Game::Game()
 
 	mFont = NULL;
 
+	mPaddleHitSound = NULL;
+	mWallHitSound = NULL;
+
 	mPlayer1Score = 0;
 	mPlayer2Score = 0;
 }
@@ -20,7 +23,7 @@ bool Game::init()
 {
 	bool success = true;
 
-	if (SDL_Init(SDL_INIT_VIDEO) < 0)
+	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0)
 	{
 		printf("SDL could not initialize! SDL_Error: %s\n", SDL_GetError());
 		success = false;
@@ -54,6 +57,12 @@ bool Game::init()
 					printf("SDL_ttf could not initialize! SDL_ttf Error: %s\n", TTF_GetError());
 					success = false;
 				}
+
+				if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0)
+				{
+					printf("SDL_mixer could not initialize! SDL_mixer Error: %s\n", Mix_GetError());
+					success = false;
+				}
 			}
 		}
 	}
@@ -82,6 +91,12 @@ void Game::close()
 	mWindow = NULL;
 	mRenderer = NULL;
 
+	Mix_FreeChunk(mPaddleHitSound);
+	Mix_FreeChunk(mWallHitSound);
+	mPaddleHitSound = NULL;
+	mWallHitSound = NULL;
+
+	Mix_Quit();
 	TTF_Quit();
 	IMG_Quit();
 	SDL_Quit();
@@ -176,6 +191,20 @@ bool Game::loadMedia()
 		updateScores();
 	}
 
+	mPaddleHitSound = Mix_LoadWAV("paddle-hit.wav");
+	if (mPaddleHitSound == NULL)
+	{
+		printf("Failed to load paddle hit sound! SDL_mixer Error: %s\n", Mix_GetError());
+		success = false;
+	}
+
+	mWallHitSound = Mix_LoadWAV("wall-hit.wav");
+	if (mWallHitSound == NULL)
+	{
+		printf("Failed to load wall hit sound! SDL_mixer Error: %s\n", Mix_GetError());
+		success = false;
+	}
+
 	return success;
 }
 
@@ -202,11 +231,19 @@ bool Game::loadObjects()
 	}
 	else
 	{
-		mBallSprite.setVelX(-2);
-		mBallSprite.setVelY(1);
+		resetBall();
 	}
 
 	return success;
+}
+
+void Game::resetBall()
+{
+	mBallSprite.setPosX((SCREEN_WIDTH - mBallSprite.getWidth()) / 2);
+	mBallSprite.setPosY((SCREEN_HEIGHT - mBallSprite.getHeight()) / 2);
+
+	mBallSprite.setVelX(-2);
+	mBallSprite.setVelY(1);
 }
 
 void Game::handleKeyboardEvent(SDL_Event& e)
@@ -280,27 +317,38 @@ void Game::checkBallCollisions()
 	if (mPhysicsEngine.checkSpriteCollision(mBallSprite, mPlayer1Sprite))
 	{
 		mBallSprite.setVelX(mBallSprite.getVelX() * -1);
+		
+		if (Mix_PlayChannel(-1, mPaddleHitSound, 0) == -1)
+		{
+			printf("Mix_PlayChannel Error: %s\n", Mix_GetError());
+		}
 	}
 	else if (mPhysicsEngine.checkSpriteCollision(mBallSprite, mPlayer2Sprite))
 	{
 		mBallSprite.setVelX(mBallSprite.getVelX() * -1);
+
+		if (Mix_PlayChannel(-1, mPaddleHitSound, 0) == -1)
+		{
+			printf("Mix_PlayChannel Error: %s\n", Mix_GetError());
+		}
 	}
 
 	if (mBallSprite.getPosY() < 0 || mBallSprite.getPosY() + mBallSprite.getHeight() > SCREEN_HEIGHT)
 	{
 		mBallSprite.setVelY(mBallSprite.getVelY() * -1);
+		Mix_PlayChannel(-1, mWallHitSound, 0);
 	}
 
 	if (mBallSprite.getPosX() < 0)
 	{
-		mBallSprite.setVelX(mBallSprite.getVelX() * -1);
+		resetBall();
 
 		++mPlayer2Score;
 		updateScores();
 	}
 	else if (mBallSprite.getPosX() + mBallSprite.getWidth() > SCREEN_WIDTH)
 	{
-		mBallSprite.setVelX(mBallSprite.getVelX() * -1);
+		resetBall();
 
 		++mPlayer1Score;
 		updateScores();

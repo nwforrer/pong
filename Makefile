@@ -10,7 +10,7 @@ CC = g++
 COMPILER_FLAGS  = -std=c++11 -g -Wall -Werror
 
 INCLUDE_FLAGS = -I/usr/include/SDL2 -D_REENTRANT
-LINKER_FLAGS = -L/usr/lib -lSDL2 -lSDL2_image -lSDL2_ttf -lpthread
+LINKER_FLAGS = -L/usr/lib -lSDL2 -lSDL2_image -lSDL2_ttf -lSDL2_mixer -lpthread
 
 OBJ_NAME = build/pong
 

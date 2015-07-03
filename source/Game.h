@@ -4,6 +4,7 @@
 #include <SDL.h>
 #include <SDL_image.h>
 #include <SDL_ttf.h>
+#include <SDL_mixer.h>
 
 #include <stdio.h>
 #include <string>
@@ -43,10 +44,15 @@ private:
 
 	void updateScores();
 
+	void resetBall();
+
 	SDL_Window* mWindow;
 	SDL_Renderer* mRenderer;
 
 	TTF_Font* mFont;
+	
+	Mix_Chunk* mPaddleHitSound;
+	Mix_Chunk* mWallHitSound;
 
 	int mPlayer1Score;
 	int mPlayer2Score;
