@@ -1,5 +1,6 @@
 OBJS = source/main.cpp \
 	   source/Game.cpp \
+	   source/GameOverScene.cpp \
 	   source/MainMenuScene.cpp \
 	   source/MainScene.cpp \
 	   source/Physics.cpp \

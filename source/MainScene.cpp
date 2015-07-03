@@ -324,4 +324,10 @@ void MainScene::updateScores()
 	{
 		printf("Unable to render player 2 score texture!\n");
 	}
+
+	if (mPlayer1Score >= 3 || mPlayer2Score >= 3)
+	{
+		mScenes->pop();
+		mScenes->push(new GameOverScene(mScenes, mRenderer));
+	}
 }

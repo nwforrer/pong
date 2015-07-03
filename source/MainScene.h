@@ -11,13 +11,11 @@
 #include <cmath>
 
 #include "Scene.h"
+#include "GameOverScene.h"
 #include "SDLTexture.h"
 #include "SDLTimer.h"
 #include "Sprite.h"
 #include "Physics.h"
-
-const int SCREEN_WIDTH = 640;
-const int SCREEN_HEIGHT = 480;
 
 const int PADDLE_VELOCITY = 3;
 
