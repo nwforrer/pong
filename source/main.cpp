@@ -12,14 +12,7 @@ int main(int argc, char **argv)
 	}
 	else
 	{
-		if (!game.loadMedia() || !game.loadObjects())
-		{
-			printf("Failed to load media!\n");
-		}
-		else
-		{
-			game.gameLoop();
-		}
+		game.gameLoop();
 	}
 
 	game.close();

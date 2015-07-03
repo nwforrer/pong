@@ -1,6 +1,9 @@
 OBJS = source/main.cpp \
 	   source/Game.cpp \
+	   source/MainMenuScene.cpp \
+	   source/MainScene.cpp \
 	   source/Physics.cpp \
+	   source/Scene.cpp \
 	   source/SDLTexture.cpp \
 	   source/SDLTimer.cpp \
 	   source/Sprite.cpp
