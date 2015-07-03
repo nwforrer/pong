@@ -12,6 +12,8 @@ Game::Game()
 
 	mPlayer1Score = 0;
 	mPlayer2Score = 0;
+
+	mLockBallCollisionCheck = false;
 }
 
 Game::~Game()
@@ -314,23 +316,33 @@ void Game::checkPaddleScreenCollision(Sprite* sprite)
 
 void Game::checkBallCollisions()
 {
-	if (mPhysicsEngine.checkSpriteCollision(mBallSprite, mPlayer1Sprite))
+	if (!mLockBallCollisionCheck)
 	{
-		mBallSprite.setVelX(mBallSprite.getVelX() * -1);
-		
-		if (Mix_PlayChannel(-1, mPaddleHitSound, 0) == -1)
+		if (mPhysicsEngine.checkSpriteCollision(mBallSprite, mPlayer1Sprite))
 		{
-			printf("Mix_PlayChannel Error: %s\n", Mix_GetError());
+			mBallSprite.setVelX(mBallSprite.getVelX() * -1);
+			mLockBallCollisionCheck = true;
+			
+			if (Mix_PlayChannel(-1, mPaddleHitSound, 0) == -1)
+			{
+				printf("Mix_PlayChannel Error: %s\n", Mix_GetError());
+			}
+		}
+		else if (mPhysicsEngine.checkSpriteCollision(mBallSprite, mPlayer2Sprite))
+		{
+			mBallSprite.setVelX(mBallSprite.getVelX() * -1);
+			mLockBallCollisionCheck = true;
+
+			if (Mix_PlayChannel(-1, mPaddleHitSound, 0) == -1)
+			{
+				printf("Mix_PlayChannel Error: %s\n", Mix_GetError());
+			}
 		}
 	}
-	else if (mPhysicsEngine.checkSpriteCollision(mBallSprite, mPlayer2Sprite))
+	else if ((mBallSprite.getVelX() > 0 && mBallSprite.getPosX() > SCREEN_WIDTH / 2) ||
+			(mBallSprite.getVelX() < 0 && mBallSprite.getPosX() < SCREEN_WIDTH / 2))
 	{
-		mBallSprite.setVelX(mBallSprite.getVelX() * -1);
-
-		if (Mix_PlayChannel(-1, mPaddleHitSound, 0) == -1)
-		{
-			printf("Mix_PlayChannel Error: %s\n", Mix_GetError());
-		}
+		mLockBallCollisionCheck = false;
 	}
 
 	if (mBallSprite.getPosY() < 0 || mBallSprite.getPosY() + mBallSprite.getHeight() > SCREEN_HEIGHT)

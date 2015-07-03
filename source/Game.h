@@ -50,7 +50,7 @@ private:
 	SDL_Renderer* mRenderer;
 
 	TTF_Font* mFont;
-	
+
 	Mix_Chunk* mPaddleHitSound;
 	Mix_Chunk* mWallHitSound;
 
@@ -69,6 +69,11 @@ private:
 	Sprite mBallSprite;
 
 	Physics mPhysicsEngine;
+
+	// after a ball collides with a paddle, don't recheck collision until the
+	// ball croses the center of the screen in order to avoid multiple collisions
+	// on one paddle.
+	bool mLockBallCollisionCheck;
 };
 
 #endif
