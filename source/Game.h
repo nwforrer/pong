@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <string>
 #include <sstream>
+#include <cmath>
 
 #include "SDLTexture.h"
 #include "SDLTimer.h"
@@ -18,7 +19,7 @@
 const int SCREEN_WIDTH = 640;
 const int SCREEN_HEIGHT = 480;
 
-const int PADDLE_VELOCITY = 4;
+const int PADDLE_VELOCITY = 3;
 
 class Game
 {

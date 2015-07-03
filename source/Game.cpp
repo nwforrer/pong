@@ -242,10 +242,10 @@ bool Game::loadObjects()
 void Game::resetBall()
 {
 	mBallSprite.setPosX((SCREEN_WIDTH - mBallSprite.getWidth()) / 2);
-	mBallSprite.setPosY((SCREEN_HEIGHT - mBallSprite.getHeight()) / 2);
+	mBallSprite.setPosY(((SCREEN_HEIGHT - mBallSprite.getHeight()) / 2) - 100);
 
-	mBallSprite.setVelX(-2);
-	mBallSprite.setVelY(1);
+	mBallSprite.setVelX(-4);
+	mBallSprite.setVelY(3);
 }
 
 void Game::handleKeyboardEvent(SDL_Event& e)
@@ -321,6 +321,19 @@ void Game::checkBallCollisions()
 		if (mPhysicsEngine.checkSpriteCollision(mBallSprite, mPlayer1Sprite))
 		{
 			mBallSprite.setVelX(mBallSprite.getVelX() * -1);
+
+			int paddleCenter = mPlayer1Sprite.getPosY() + (mPlayer1Sprite.getHeight() / 2);
+			int ballCenter = mBallSprite.getPosY() + (mBallSprite.getHeight() / 2);
+
+			if (ballCenter >= paddleCenter)
+			{
+				mBallSprite.setVelY(std::abs(mBallSprite.getVelY()));
+			}
+			else
+			{
+				mBallSprite.setVelY(-std::abs(mBallSprite.getVelY()));
+			}
+
 			mLockBallCollisionCheck = true;
 			
 			if (Mix_PlayChannel(-1, mPaddleHitSound, 0) == -1)
@@ -331,6 +344,19 @@ void Game::checkBallCollisions()
 		else if (mPhysicsEngine.checkSpriteCollision(mBallSprite, mPlayer2Sprite))
 		{
 			mBallSprite.setVelX(mBallSprite.getVelX() * -1);
+
+			int paddleCenter = mPlayer2Sprite.getPosY() + (mPlayer2Sprite.getHeight() / 2);
+			int ballCenter = mBallSprite.getPosY() + (mBallSprite.getHeight() / 2);
+
+			if (ballCenter >= paddleCenter)
+			{
+				mBallSprite.setVelY(std::abs(mBallSprite.getVelY()));
+			}
+			else
+			{
+				mBallSprite.setVelY(-std::abs(mBallSprite.getVelY()));
+			}
+
 			mLockBallCollisionCheck = true;
 
 			if (Mix_PlayChannel(-1, mPaddleHitSound, 0) == -1)
