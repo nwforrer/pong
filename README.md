@@ -1,6 +1,6 @@
 # README #
 
-A simple clone of Pong.
+A simple clone of Pong.  Latest version: v0.1
 
 ### Controls ###
 * W and S control Player 1's paddle
