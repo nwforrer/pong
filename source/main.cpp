@@ -26,12 +26,18 @@ void checkPaddleScreenCollision(Sprite sprite);
 
 void checkBallCollisions();
 
+void updateScores();
+
 SDL_Window* gWindow = NULL;
 SDL_Renderer* gRenderer = NULL;
 
 TTF_Font* gFont = NULL;
 
-SDLTexture gTextTexture;
+int gPlayer1Score = 0;
+int gPlayer2Score = 0;
+
+SDLTexture gPlayer1ScoreTextTexture;
+SDLTexture gPlayer2ScoreTextTexture;
 
 SDLTexture gPlayer1Texture;
 SDLTexture gPlayer2Texture;
@@ -40,6 +46,8 @@ SDLTexture gBallTexture;
 Sprite gPlayer1Sprite;
 Sprite gPlayer2Sprite;
 Sprite gBallSprite;
+
+Physics gPhysicsEngine;
 
 bool init()
 {
@@ -116,12 +124,7 @@ bool loadMedia()
 	}
 	else
 	{
-		SDL_Color textColor = { 255, 255, 255, 255 };
-		if (!gTextTexture.loadFromRenderedText(gRenderer, gFont, "This is some text.", textColor))
-		{
-			printf("Failed to render text texture!\n");
-			success = false;
-		}
+		updateScores();
 	}
 
 	return success;
@@ -163,7 +166,8 @@ void close()
 	gPlayer2Texture.free();
 	gBallTexture.free();
 
-	gTextTexture.free();
+	gPlayer1ScoreTextTexture.free();
+	gPlayer2ScoreTextTexture.free();
 
 	gPlayer1Sprite.free();
 	gPlayer2Sprite.free();
@@ -250,11 +254,11 @@ void checkPaddleScreenCollision(Sprite* sprite)
 
 void checkBallCollisions()
 {
-	if (Physics::getInstance().checkSpriteCollision(gBallSprite, gPlayer1Sprite))
+	if (gPhysicsEngine.checkSpriteCollision(gBallSprite, gPlayer1Sprite))
 	{
 		gBallSprite.setVelX(gBallSprite.getVelX() * -1);
 	}
-	else if (Physics::getInstance().checkSpriteCollision(gBallSprite, gPlayer2Sprite))
+	else if (gPhysicsEngine.checkSpriteCollision(gBallSprite, gPlayer2Sprite))
 	{
 		gBallSprite.setVelX(gBallSprite.getVelX() * -1);
 	}
@@ -262,6 +266,44 @@ void checkBallCollisions()
 	if (gBallSprite.getPosY() < 0 || gBallSprite.getPosY() + gBallSprite.getHeight() > SCREEN_HEIGHT)
 	{
 		gBallSprite.setVelY(gBallSprite.getVelY() * -1);
+	}
+
+	if (gBallSprite.getPosX() < 0)
+	{
+		gBallSprite.setVelX(gBallSprite.getVelX() * -1);
+
+		++gPlayer2Score;
+		updateScores();
+	}
+	else if (gBallSprite.getPosX() + gBallSprite.getWidth() > SCREEN_WIDTH)
+	{
+		gBallSprite.setVelX(gBallSprite.getVelX() * -1);
+
+		++gPlayer1Score;
+		updateScores();
+	}
+}
+
+void updateScores()
+{
+	std::stringstream player1Text;
+	std::stringstream player2Text;
+
+	SDL_Color textColor = { 255, 255, 255, 255 };
+
+	player1Text.str( "" );
+	player2Text.str( "" );
+
+	player1Text << "Score: " << gPlayer1Score;
+	player2Text << "Score: " << gPlayer2Score;
+
+	if (!gPlayer1ScoreTextTexture.loadFromRenderedText(gRenderer, gFont, player1Text.str().c_str(), textColor))
+	{
+		printf("Unable to render player 1 score texture!\n");
+	}
+	if (!gPlayer2ScoreTextTexture.loadFromRenderedText(gRenderer, gFont, player2Text.str().c_str(), textColor))
+	{
+		printf("Unable to render player 2 score texture!\n");
 	}
 }
 
@@ -324,7 +366,8 @@ int main(int argc, char **argv)
 				gPlayer2Sprite.render();
 				gBallSprite.render();
 
-				gTextTexture.render((SCREEN_WIDTH - gTextTexture.getWidth()) / 2, (SCREEN_HEIGHT - gTextTexture.getHeight()) / 2);
+				gPlayer1ScoreTextTexture.render(10, 10);
+				gPlayer2ScoreTextTexture.render(SCREEN_WIDTH - gPlayer2ScoreTextTexture.getWidth() - 10, 10);
 				
 				SDL_RenderPresent(gRenderer);
 
