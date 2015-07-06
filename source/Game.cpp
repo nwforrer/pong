@@ -1,16 +1,5 @@
 #include "Game.h"
-
-Game::Game()
-{
-	mWindow = NULL;
-	mRenderer = NULL;
-	mMainMenuScene = NULL;
-}
-
-Game::~Game()
-{
-	close();
-}
+#include "GameState.h"
 
 bool Game::init()
 {
@@ -56,28 +45,27 @@ bool Game::init()
 					printf("SDL_mixer could not initialize! SDL_mixer Error: %s\n", Mix_GetError());
 					success = false;
 				}
-
-				mMainMenuScene = new MainMenuScene(&mScenes, mRenderer);
 			}
 		}
 	}
+
+	mRunning = true;
 
 	return success;
 }
 
 void Game::close()
 {
+	while (!mStates.empty())
+	{
+		mStates.back()->close();
+		mStates.pop_back();
+	}
+	
 	SDL_DestroyRenderer(mRenderer);
 	SDL_DestroyWindow(mWindow);
 	mWindow = NULL;
 	mRenderer = NULL;
-
-	if (mMainMenuScene != NULL)
-	{
-		mMainMenuScene->close();
-		delete mMainMenuScene;
-		mMainMenuScene = NULL;
-	}
 
 	Mix_Quit();
 	TTF_Quit();
@@ -85,44 +73,54 @@ void Game::close()
 	SDL_Quit();
 }
 
-void Game::gameLoop()
+void Game::changeState(GameState* state)
 {
-	bool quit = false;
-	SDL_Event e;
-
-	SDLTimer timer;
-
-	mScenes.push(mMainMenuScene);
-
-	while (!quit)
+	if (!mStates.empty())
 	{
-		Scene* currentScene = mScenes.top();
-
-		while (SDL_PollEvent(&e) != 0)
-		{
-			if (e.type == SDL_QUIT)
-			{
-				quit = true;
-			}
-
-			currentScene->handleInput(e);
-			if (mScenes.size() == 0)
-			{
-				quit = true;
-				break;
-			}
-			currentScene = mScenes.top();
-		}
-
-		//float timeStep = timer.getTicks() / 1000.0f;
-
-		SDL_SetRenderDrawColor(mRenderer, 0, 0, 0, 0);
-		SDL_RenderClear(mRenderer);
-		
-		currentScene->handleRender();
-
-		SDL_RenderPresent(mRenderer);
-
-		timer.start();
+		mStates.back()->close();
+		mStates.pop_back();
 	}
+
+	mStates.push_back(state);
+	mStates.back()->init(this);
+}
+
+void Game::pushState(GameState* state)
+{
+	if (!mStates.empty()) 
+	{
+		mStates.back()->pause();
+	}
+
+	mStates.push_back(state);
+	mStates.back()->init(this);
+}
+
+void Game::popState()
+{
+	if (!mStates.empty())
+	{
+		mStates.back()->close();
+		mStates.pop_back();
+	}
+
+	if (!mStates.empty())
+	{
+		mStates.back()->resume();
+	}
+}
+
+void Game::handleEvents()
+{
+	mStates.back()->handleEvents(this);
+}
+
+void Game::update()
+{
+	mStates.back()->update(this);
+}
+
+void Game::render()
+{
+	mStates.back()->render(this);
 }

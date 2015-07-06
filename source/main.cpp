@@ -1,6 +1,7 @@
 #include <stdio.h>
 
 #include "Game.h"
+#include "MainMenuState.h"
 
 int main(int argc, char **argv)
 {
@@ -12,7 +13,14 @@ int main(int argc, char **argv)
 	}
 	else
 	{
-		game.gameLoop();
+		game.changeState(MainMenuState::instance());
+
+		while (game.isRunning())
+		{
+			game.handleEvents();
+			game.update();
+			game.render();
+		}
 	}
 
 	game.close();

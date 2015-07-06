@@ -7,29 +7,40 @@
 #include <SDL_mixer.h>
 
 #include <stdio.h>
-#include <stack>
+#include <vector>
 
-#include "Scene.h"
-#include "MainMenuScene.h"
 #include "SDLTimer.h"
+
+const int SCREEN_WIDTH = 640;
+const int SCREEN_HEIGHT = 480;
+
+class GameState;
 
 class Game
 {
 public:
-	Game();
-	~Game();
-
 	bool init();
 	void close();
 
-	void gameLoop();
+	void changeState(GameState* state);
+	void pushState(GameState* state);
+	void popState();
+
+	void handleEvents();
+	void update();
+	void render();
+
+	bool isRunning() { return mRunning; }
+	void quit() { mRunning = false; }
+
+	SDL_Renderer* mRenderer;
 
 private:
 	SDL_Window* mWindow;
-	SDL_Renderer* mRenderer;
 
-	MainMenuScene *mMainMenuScene;
-	std::stack<Scene*> mScenes;
+	std::vector<GameState*> mStates;
+
+	bool mRunning;
 };
 
 #endif

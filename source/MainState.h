@@ -1,5 +1,5 @@
-#ifndef MAIN_SCENE_H_
-#define MAIN_SCENE_H_
+#ifndef MAIN_STATE_H
+#define MAIN_STATE_H
 
 #include <SDL.h>
 #include <SDL_ttf.h>
@@ -10,8 +10,7 @@
 #include <sstream>
 #include <cmath>
 
-#include "Scene.h"
-#include "GameOverScene.h"
+#include "GameState.h"
 #include "SDLTexture.h"
 #include "SDLTimer.h"
 #include "Sprite.h"
@@ -19,27 +18,38 @@
 
 const int PADDLE_VELOCITY = 3;
 
-class MainScene : public Scene
+class MainState : public GameState
 {
 public:
-	MainScene(std::stack<Scene*> *scenes, SDL_Renderer *renderer);
-	~MainScene();
-
-	bool init();
+	bool init(Game* game);
 	void close();
 
-	void handleRender();
-	void handleInput(SDL_Event& e);
+	void pause();
+	void resume();
+
+	void handleEvents(Game* game);
+	void update(Game* game);
+	void render(Game* game);
+
+	static MainState* instance()
+	{
+		return &mMainState;
+	}
+
+protected:
+	MainState() { }
 
 private:
-	bool loadMedia();
+	static MainState mMainState;
+
+	bool loadMedia(Game* game);
 	bool loadObjects();
 
 	void checkPaddleScreenCollision(Sprite* sprite);
 
-	void checkBallCollisions();
+	void checkBallCollisions(Game* game);
 
-	void updateScores();
+	void updateScores(Game* game);
 
 	void resetBall();
 
