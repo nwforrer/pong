@@ -17,6 +17,7 @@
 #include "Physics.h"
 
 const int PADDLE_VELOCITY = 3;
+const int WIN_SCORE = 5;
 
 class MainState : public GameState
 {

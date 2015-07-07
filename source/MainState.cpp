@@ -357,7 +357,7 @@ void MainState::updateScores(Game* game)
 		printf("Unable to render player 2 score texture!\n");
 	}
 
-	if (mPlayer1Score >= 3 || mPlayer2Score >= 3)
+	if (mPlayer1Score >= WIN_SCORE || mPlayer2Score >= WIN_SCORE)
 	{
 		game->changeState(GameOverState::instance());
 	}
