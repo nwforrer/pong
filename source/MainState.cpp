@@ -1,16 +1,10 @@
-#include "MainScene.h"
+#include "MainState.h"
+#include "GameOverState.h"
+#include "PauseMenuState.h"
 
-MainScene::MainScene(std::stack<Scene*> *scenes, SDL_Renderer *renderer) : Scene(scenes, renderer)
-{
-	init();
-}
+MainState MainState::mMainState;
 
-MainScene::~MainScene()
-{
-	close();
-}
-
-bool MainScene::init()
+bool MainState::init(Game* game)
 {
 	mFont = NULL;
 
@@ -22,13 +16,13 @@ bool MainScene::init()
 
 	mLockBallCollisionCheck = false;
 
-	loadMedia();
+	loadMedia(game);
 	loadObjects();
 
 	return true;
 }
 
-void MainScene::close()
+void MainState::close()
 {
 	mPlayer1Texture.free();
 	mPlayer2Texture.free();
@@ -50,7 +44,95 @@ void MainScene::close()
 	mWallHitSound = NULL;
 }
 
-void MainScene::handleRender()
+void MainState::pause()
+{
+
+}
+
+void MainState::resume()
+{
+
+}
+
+void MainState::handleEvents(Game* game)
+{
+	SDL_Event event;
+
+	while (SDL_PollEvent(&event))
+	{
+		switch (event.type)
+		{
+			case SDL_QUIT:
+			{
+				game->quit();
+			} break;
+
+			case SDL_KEYDOWN:
+			{
+				if (event.key.repeat == 0)
+				{
+					switch (event.key.keysym.sym)
+					{
+						case SDLK_ESCAPE:
+						{
+							game->pushState(PauseMenuState::instance());
+						} break;
+						case SDLK_w:
+						{
+							mPlayer1Sprite.addVelY(-PADDLE_VELOCITY);
+						} break;
+						
+						case SDLK_s:
+						{
+							mPlayer1Sprite.addVelY(PADDLE_VELOCITY);
+						} break;
+
+						case SDLK_UP:
+						{
+							mPlayer2Sprite.addVelY(-PADDLE_VELOCITY);
+						} break;
+
+						case SDLK_DOWN:
+						{
+							mPlayer2Sprite.addVelY(PADDLE_VELOCITY);
+						} break;
+					}
+				}
+			} break;
+
+			case SDL_KEYUP:
+			{
+				if (event.key.repeat == 0)
+					{
+						switch (event.key.keysym.sym)
+						{
+							case SDLK_w:
+							{
+								mPlayer1Sprite.addVelY(PADDLE_VELOCITY);
+							} break;
+							
+							case SDLK_s:
+							{
+								mPlayer1Sprite.addVelY(-PADDLE_VELOCITY);
+							} break;
+
+							case SDLK_UP:
+							{
+								mPlayer2Sprite.addVelY(PADDLE_VELOCITY);
+							} break;
+
+							case SDLK_DOWN:
+							{
+								mPlayer2Sprite.addVelY(-PADDLE_VELOCITY);
+							} break;
+						}
+					}
+			} break;
+		}
+	}
+}
+
+void MainState::update(Game* game)
 {
 	mPlayer1Sprite.update();
 	mPlayer2Sprite.update();
@@ -59,7 +141,13 @@ void MainScene::handleRender()
 	checkPaddleScreenCollision(&mPlayer1Sprite);
 	checkPaddleScreenCollision(&mPlayer2Sprite);
 
-	checkBallCollisions();
+	checkBallCollisions(game);
+}
+
+void MainState::render(Game* game)
+{
+	SDL_SetRenderDrawColor(game->mRenderer, 0, 0, 0, 0);
+	SDL_RenderClear(game->mRenderer);
 
 	mPlayer1Sprite.render();
 	mPlayer2Sprite.render();
@@ -67,83 +155,27 @@ void MainScene::handleRender()
 
 	mPlayer1ScoreTextTexture.render(10, 10);
 	mPlayer2ScoreTextTexture.render(SCREEN_WIDTH - mPlayer2ScoreTextTexture.getWidth() - 10, 10);
+
+	SDL_RenderPresent(game->mRenderer);
 }
 
-void MainScene::handleInput(SDL_Event& e)
-{
-	if (e.type == SDL_KEYDOWN && e.key.repeat == 0)
-	{
-		switch (e.key.keysym.sym)
-		{
-			case SDLK_ESCAPE:
-			{
-				mScenes->pop();
-			} break;
-			case SDLK_w:
-			{
-				mPlayer1Sprite.addVelY(-PADDLE_VELOCITY);
-			} break;
-			
-			case SDLK_s:
-			{
-				mPlayer1Sprite.addVelY(PADDLE_VELOCITY);
-			} break;
-
-			case SDLK_UP:
-			{
-				mPlayer2Sprite.addVelY(-PADDLE_VELOCITY);
-			} break;
-
-			case SDLK_DOWN:
-			{
-				mPlayer2Sprite.addVelY(PADDLE_VELOCITY);
-			}
-		}
-	}
-	else if (e.type == SDL_KEYUP && e.key.repeat == 0)
-	{
-		switch (e.key.keysym.sym)
-		{
-			case SDLK_w:
-			{
-				mPlayer1Sprite.addVelY(PADDLE_VELOCITY);
-			} break;
-			
-			case SDLK_s:
-			{
-				mPlayer1Sprite.addVelY(-PADDLE_VELOCITY);
-			} break;
-
-			case SDLK_UP:
-			{
-				mPlayer2Sprite.addVelY(PADDLE_VELOCITY);
-			} break;
-
-			case SDLK_DOWN:
-			{
-				mPlayer2Sprite.addVelY(-PADDLE_VELOCITY);
-			}
-		}
-	}
-}
-
-bool MainScene::loadMedia()
+bool MainState::loadMedia(Game* game)
 {
 	bool success = true;
 
-	if (!mPlayer1Texture.loadFromFile(mRenderer, "player1-paddle.png"))
+	if (!mPlayer1Texture.loadFromFile(game->mRenderer, "player1-paddle.png"))
 	{
 		printf("Failed to load player1 paddle image!\n");
 		success = false;
 	}
 
-	if (!mPlayer2Texture.loadFromFile(mRenderer, "player2-paddle.png"))
+	if (!mPlayer2Texture.loadFromFile(game->mRenderer, "player2-paddle.png"))
 	{
 		printf("Failed to load player2 paddle image!\n");
 		success = false;
 	}
 
-	if (!mBallTexture.loadFromFile(mRenderer, "ball.png"))
+	if (!mBallTexture.loadFromFile(game->mRenderer, "ball.png"))
 	{
 		printf("Failed to load ball image!\n");
 		success = false;
@@ -157,7 +189,7 @@ bool MainScene::loadMedia()
 	}
 	else
 	{
-		updateScores();
+		updateScores(game);
 	}
 
 	mPaddleHitSound = Mix_LoadWAV("paddle-hit.wav");
@@ -177,7 +209,7 @@ bool MainScene::loadMedia()
 	return success;
 }
 
-bool MainScene::loadObjects()
+bool MainState::loadObjects()
 {
 	bool success = true;
 
@@ -206,7 +238,7 @@ bool MainScene::loadObjects()
 	return success;
 }
 
-void MainScene::resetBall()
+void MainState::resetBall()
 {
 	mBallSprite.setPosX((SCREEN_WIDTH - mBallSprite.getWidth()) / 2);
 	mBallSprite.setPosY(((SCREEN_HEIGHT - mBallSprite.getHeight()) / 2) - 100);
@@ -215,7 +247,7 @@ void MainScene::resetBall()
 	mBallSprite.setVelY(3);
 }
 
-void MainScene::checkPaddleScreenCollision(Sprite* sprite)
+void MainState::checkPaddleScreenCollision(Sprite* sprite)
 {
 	if (sprite->getPosY() < 0)
 	{
@@ -227,7 +259,7 @@ void MainScene::checkPaddleScreenCollision(Sprite* sprite)
 	}
 }
 
-void MainScene::checkBallCollisions()
+void MainState::checkBallCollisions(Game* game)
 {
 	if (!mLockBallCollisionCheck)
 	{
@@ -295,18 +327,18 @@ void MainScene::checkBallCollisions()
 		resetBall();
 
 		++mPlayer2Score;
-		updateScores();
+		updateScores(game);
 	}
 	else if (mBallSprite.getPosX() + mBallSprite.getWidth() > SCREEN_WIDTH)
 	{
 		resetBall();
 
 		++mPlayer1Score;
-		updateScores();
+		updateScores(game);
 	}
 }
 
-void MainScene::updateScores()
+void MainState::updateScores(Game* game)
 {
 	std::stringstream player1Text;
 	std::stringstream player2Text;
@@ -316,18 +348,17 @@ void MainScene::updateScores()
 	player1Text << "Score: " << mPlayer1Score;
 	player2Text << "Score: " << mPlayer2Score;
 
-	if (!mPlayer1ScoreTextTexture.loadFromRenderedText(mRenderer, mFont, player1Text.str().c_str(), textColor))
+	if (!mPlayer1ScoreTextTexture.loadFromRenderedText(game->mRenderer, mFont, player1Text.str().c_str(), textColor))
 	{
 		printf("Unable to render player 1 score texture!\n");
 	}
-	if (!mPlayer2ScoreTextTexture.loadFromRenderedText(mRenderer, mFont, player2Text.str().c_str(), textColor))
+	if (!mPlayer2ScoreTextTexture.loadFromRenderedText(game->mRenderer, mFont, player2Text.str().c_str(), textColor))
 	{
 		printf("Unable to render player 2 score texture!\n");
 	}
 
-	if (mPlayer1Score >= 3 || mPlayer2Score >= 3)
+	if (mPlayer1Score >= WIN_SCORE || mPlayer2Score >= WIN_SCORE)
 	{
-		mScenes->pop();
-		mScenes->push(new GameOverScene(mScenes, mRenderer));
+		game->changeState(GameOverState::instance());
 	}
 }
