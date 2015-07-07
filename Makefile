@@ -26,4 +26,4 @@ $(OBJS): build/%.o : source/%.cpp source/%.h
 	$(CC) -c $(COMPILER_FLAGS) $< -o $@
 
 clean :
-	rm build/*.o $(OBJ_NAME)
+	rm -fv build/*.o $(OBJ_NAME)
